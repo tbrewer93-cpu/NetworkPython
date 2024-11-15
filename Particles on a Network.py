@@ -124,15 +124,14 @@ class Particle2D:
         Nlist[0].ipl=-1; #Empty node's internal particle list
         self.i=args[0] #Update particle's node
         print(self.i)
-        Nlist[self.i].ipl=self.idx #Update next node's internal particle list
-        
+        Nlist[self.i].ipl=self.idx #Update next node's internal particle list    
     #Move particle
 
     def __delete__(self,Nlist,Plist):
-        (Nlist[self.i].ipl).remove(self.idx) #Remove particle from nodes internal list
+        Nlist[self.i].ipl=-1 #Remove particle from nodes internal list
         Plist[self.idx]=None #Delete particle from list
         return None
-    #Delete Node
+    #Delete particle
 
     def __str__(self):
         return 'Particle {} on node {}'.format(self.idx,self.i)
@@ -226,6 +225,14 @@ class NetworkPart:
         (self.w)=args[1]
         ((self.Nlist)[self.idx]).w=self.w
         #Change variable associated with node
+
+    def __excheck__(self, *args):
+        (self.obj)=args[0]
+        ex=True #True or false if object exists/doesn't
+        if self.obj == None:
+            ex=False
+        return ex
+        #Check if object exists
         
     def __deleteedge__(self, *args):
         (self.Elist[args[0]]).__delete__(self.Nlist,self.Elist) 
@@ -263,14 +270,17 @@ class NetworkPart:
         n = len(Nlist)
         m = len(Elist)
         p = len(plist)
-        for a in range(0,n-1):            
-            matplotlib.pyplot.plot(self.Nlist[a].i,self.Nlist[a].j,'bo',markersize=20) #Plot edge 
+        for a in range(0,n-1):
+            if self.__excheck__(Nlist[a]):            
+                matplotlib.pyplot.plot(self.Nlist[a].i,self.Nlist[a].j,'bo',markersize=20) #Plot node 
         for a in range(0,m-1):  
-            ln=self.Elist[a].i
-            un=self.Elist[a].j
-            matplotlib.pyplot.plot([self.Nlist[ln].i,self.Nlist[un].i],[self.Nlist[ln].j,self.Nlist[un].j],'r-') #Plot edge 
-        for a in range(0,p-1):            
-            matplotlib.pyplot.plot(self.Nlist[plist[a].i].i,self.Nlist[plist[a].i].j,'kx') #Plot edge 
+            if self.__excheck__(Elist[a]):
+                ln=self.Elist[a].i
+                un=self.Elist[a].j
+                matplotlib.pyplot.plot([self.Nlist[ln].i,self.Nlist[un].i],[self.Nlist[ln].j,self.Nlist[un].j],'r-') #Plot edge 
+        for a in range(0,p-1): 
+            if self.__excheck__(plist[a]):
+                matplotlib.pyplot.plot(self.Nlist[plist[a].i].i,self.Nlist[plist[a].i].j,'kx') #Plot particle 
 
 
 class NetworkDesign:
@@ -289,14 +299,17 @@ class NetworkDesign:
         n = len(Nlist)
         m = len(Elist)
         p = len(plist)
-        for a in range(0,n):            
-            matplotlib.pyplot.plot(self.Nlist[a].i,self.Nlist[a].j,'bo',markersize=20) #Plot edge 
+        for a in range(0,n):
+            if self.__excheck__(Nlist[a]):         
+                matplotlib.pyplot.plot(self.Nlist[a].i,self.Nlist[a].j,'bo',markersize=20) #Plot node 
         for a in range(0,m):  
-            ln=self.Elist[a].i
-            un=self.Elist[a].j
-            matplotlib.pyplot.plot([self.Nlist[ln].i,self.Nlist[un].i],[self.Nlist[ln].j,self.Nlist[un].j],'r-') #Plot edge 
-        for a in range(0,p):            
-            matplotlib.pyplot.plot(self.Nlist[plist[a].i].i,self.Nlist[plist[a].i].j,'kx') #Plot edge 
+            if self.__excheck__(Elist[a]):
+                ln=self.Elist[a].i
+                un=self.Elist[a].j
+                matplotlib.pyplot.plot([self.Nlist[ln].i,self.Nlist[un].i],[self.Nlist[ln].j,self.Nlist[un].j],'r-') #Plot edge 
+        for a in range(0,p):
+            if self.__excheck__(plist[a]):            
+                matplotlib.pyplot.plot(self.Nlist[plist[a].i].i,self.Nlist[plist[a].i].j,'kx') #Plot particle 
     
     def __addnode__(self, *args):
         (self.i)=args[0]
@@ -314,6 +327,34 @@ class NetworkDesign:
         #Add edge with ends args[0] and args[1] and index = M-1
         #M is new number of edges
     
+    def __addparticle__(self, *args):
+        (self.i)=args[0]
+        L=len(self.Plist)
+        (self.Plist).append(Particle2D(self.i,idx=L))
+        (self.Nlist[self.i]).ipl=L #Save particle in nodes internal list
+        self.p=L+1
+    
+    def __movenode__(self, *args):
+        (self.idx)=args[0]
+        (self.i)=args[1]
+        (self.j)=args[2]
+        ((self.Nlist)[self.idx]).i=self.i
+        ((self.Nlist)[self.idx]).j=self.j
+        #Move node with idx args[0] to position args[1],args[2]
+
+    def __moveedge__(self, *args):
+        self.idx=args[0]
+        self.i,self.j=args[1],args[2]
+        self.Elist[self.idx].i=self.i     
+        self.Elist[self.idx].j=self.j   
+        #Move edge with idx args[0] to node args[1] to node args[2]
+
+    def __moveparticle__(self, *args):
+        (self.idx)=args[0]
+        (self.i)=args[1]
+        ((self.plist)[self.idx]).i=self.i
+        #Move particle with idx args[0] to node args[1]
+         
     def __deletenode__(self, *args):
         (self.Nlist[args[0]]).__delete__(self.Nlist,self.Elist,self.Plist)
         #self.N=self.N-1
@@ -323,6 +364,11 @@ class NetworkDesign:
         (self.Elist[args[0]]).__delete__(self.Nlist,self.Elist)
         #self.M=self.M-1
         #Delete edge with idx args[0]
+
+    def __deleteparticle__(self, *args):
+        (self.Plist[args[0]]).__delete__(self.Nlist,self.Plist)
+        #self.p=self.p-1
+        #Delete particle with idx args[0]
         
     def __printn__(self):
         for a in range(0,self.N):
@@ -332,6 +378,18 @@ class NetworkDesign:
         for a in range(0,self.M):
             print(self.Elist[a])
 
+    def __printp__(self):
+        for a in range(0,self.p):
+            print(self.Plist[a])
+
+    def __excheck__(self, *args):
+        (self.obj)=args[0]
+        ex=True #True or false if object exists/doesn't
+        if self.obj == None:
+            ex=False
+        return ex
+        #Check if object exists
+
     def __str__(self):
         tp="" #String to print
         for a in range(0,self.N):
@@ -339,6 +397,9 @@ class NetworkDesign:
             tp+="\n"
         for a in range(0,self.M):
             tp+=self.Elist[a].__str__()
+            tp+="\n"
+        for a in range(0,self.p):
+            tp+=self.Plist[a].__str__()
             tp+="\n"
         return(tp)
     
@@ -349,33 +410,77 @@ class NetworkDesign:
         self.__plot__(self.Nlist,self.Elist,self.Plist)
         run = True
         cmd=""
+        sbcmd="" #Subcommand
         i,j=0,0
         while(run==True):
             cmd=input("\nNext command: ")
-            if cmd=="node":
+            if cmd=="add" or cmd=="move" or cmd=="print" or cmd=="select" or cmd=="delete":
+                sbcmd=input("Object: ") #Enter subcommand
+                
+                
+            if cmd=="node" or (cmd=="add" and sbcmd=="node"):
                 i=int(input("X Co-ordinate: "))
                 j=int(input("Y Co-ordinate: "))
                 self.__addnode__(i,j)
                 self.__printn__()
-            if cmd=="edge":
+            if cmd=="edge" or (cmd=="add" and sbcmd=="edge"):
                 i=int(input("Node 1: "))
                 j=int(input("Node 2: "))
                 self.__addedge__(i,j)
                 self.__printe__()
-            if cmd=="printn":
+            if cmd=="particle" or (cmd=="add" and sbcmd=="particle"):
+                i=int(input("Node: "))
+                self.__addparticle__(i)
+                self.__printp__()
+            ###ADD OBJECTS
+            
+            
+            if cmd=="moven" or (cmd=="move" and sbcmd=="node"):
+                idx=int(input("Node: "))
+                i=int(input("X Co-ordinate: "))
+                j=int(input("Y Co-ordinate: "))
+                self.__movenode__(idx,i,j)
                 self.__printn__()
-            if cmd=="printe":
+            if cmd=="movee" or (cmd=="move" and sbcmd=="edge"):
+                idx=int(input("Edge: "))
+                i=int(input("Node 1: "))
+                j=int(input("Node 2: "))
+                self.__moveedge__(idx,i,j)
                 self.__printe__()
-            if cmd=="printN":
-                print(self.__str__())               
-            if cmd=="deleten":
+            if cmd=="movep" or (cmd=="move" and sbcmd=="particle"):
+                idx=int(input("Particle: "))
+                i=int(input("Node: "))
+                self.__moveparticle__(idx,i)
+                self.__printp__()
+            ###MOVE OBJECTS
+            
+            
+            if cmd=="printn" or (cmd=="print" and sbcmd=="nodes"):
+                self.__printn__()
+            if cmd=="printe" or (cmd=="print" and sbcmd=="edges"):
+                self.__printe__()
+            if cmd=="printp" or (cmd=="print" and sbcmd=="particles"):
+                self.__printe__()    
+            if cmd=="printN" or (cmd=="print" and sbcmd=="network"):
+                print(self.__str__())      
+            ###PRINT OBJECTS
+            #Print objects individually with id?
+            
+            if cmd=="deleten" or (cmd=="delete" and sbcmd=="node"):
                 i=int(input("Node: "))
                 self.__deletenode__(i)
-            if cmd=="deletee":
+            if cmd=="deletee" or (cmd=="delete" and sbcmd=="edge"):
                 i=int(input("Edge: "))
                 self.__deleteedge__(i)
+            if cmd=="deletep" or (cmd=="delete" and sbcmd=="particle"):
+                i=int(input("Particle: "))
+                self.__deleteparticle__(i)
+            ###DELETE OBJECTS
+            
             if cmd=="plot":
                 self.__plot__(self.Nlist,self.Elist,self.Plist)
+            ###PLOT NETWORK    
+                
             if cmd=="end":
                 break
         
