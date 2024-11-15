@@ -49,6 +49,17 @@ class Edge2D:
         return 'Edge {} connecting nodes {} and {}'.format(self.idx,self.i,self.j)
     #Define String
 
+    def __details__(self,Nlist,Elist,Plist):
+        print('Edge {} connecting nodes {} and {}'.format(self.idx,self.i,self.j))
+        ln=Nlist[self.i] #"Lower" node
+        print(ln.__str__())
+        if(ln.ocheck()): #If occupied
+            print(Plist[ln.ipl].__str__())
+        un=Nlist[self.j] #"Upper" node
+        print(un.__str__())
+        if(un.ocheck()): #If occupied
+            print(Plist[un.ipl].__str__())
+
 
 class Node2D:
     def __init__(self, *args, **kwargs):
@@ -100,7 +111,13 @@ class Node2D:
 
     def __str__(self):
         return 'Node {} at co-ord {},{}'.format(self.idx,self.i,self.j)
-    
+
+    def __details__(self,Nlist,Elist,Plist):
+        print('Node {} at co-ord {},{}'.format(self.idx,self.i,self.j))
+        for a in range(len(self.iel)): #For each related edge
+            print(Elist[a].__str__()) #Print edge
+        if(self.ocheck()): #If occupied
+            print(Plist[self.ipl].__str__()) #Print particle
 
 class Particle2D:
     def __init__(self, *args, **kwargs):
@@ -136,6 +153,12 @@ class Particle2D:
     def __str__(self):
         return 'Particle {} on node {}'.format(self.idx,self.i)
 
+    def __details__(self,Nlist,Elist,Plist):
+        print('Particle {} on node {}'.format(self.idx,self.i))
+        n=Nlist[self.i] #Node
+        print(n.__str__())
+        for a in range(len(n.iel)): #For each related edge
+            print(Elist[n.iel[a]].__str__()) #Print edge
     
 class NetworkPart:
     #2D Network where nodes are randomnly connected
@@ -412,9 +435,12 @@ class NetworkDesign:
         cmd=""
         sbcmd="" #Subcommand
         i,j=0,0
+        so=None #Selected object
+        sl=None #Selected list
+        
         while(run==True):
             cmd=input("\nNext command: ")
-            if cmd=="add" or cmd=="move" or cmd=="print" or cmd=="select" or cmd=="delete":
+            if cmd=="add" or cmd=="move" or cmd=="print" or cmd=="select" or cmd=="cd" or cmd=="delete":
                 sbcmd=input("Object: ") #Enter subcommand
                 
                 
@@ -463,8 +489,65 @@ class NetworkDesign:
                 self.__printe__()    
             if cmd=="printN" or (cmd=="print" and sbcmd=="network"):
                 print(self.__str__())      
+                
+            if cmd=="print" and sbcmd=="node":
+                idx=int(input("Node: "))
+                print(self.Nlist[idx])
+            if cmd=="print" and sbcmd=="edge":
+                idx=int(input("Edge: "))
+                print(self.Elist[idx])
+            if cmd=="print" and sbcmd=="particle":
+                idx=int(input("Particle: "))
+                print(self.Plist[idx])
             ###PRINT OBJECTS
-            #Print objects individually with id?
+            
+            if cmd=="select" and sbcmd=="node":
+                idx=int(input("Node: "))
+                so=self.Nlist[idx]
+                sl=self.Nlist
+            if cmd=="select" and sbcmd=="edge":
+                idx=int(input("Edge: "))
+                so=self.Elist[idx]
+                sl=self.Elist
+            if cmd=="select" and sbcmd=="particle":
+                idx=int(input("Particle: "))
+                so=self.Plist[idx]
+                sl=self.Plist
+            ###SELECT OBJECTS
+            
+            if cmd=="next":
+                so=so.__next__(sl)
+            
+            if cmd=="previous":
+                so=so.__prev__(sl)
+            ###CHANGE SELECTED OBJECT
+            
+            if cmd=="details":
+                so.__details__(self.Nlist,self.Elist,self.Plist)               
+            ###PRINT SELECTED OBJECT
+            
+            if cmd=="cd" and sbcmd=="node": #Change Details
+                idx=int(input("Node: "))
+                i=int(input("New x: "))
+                j=int(input("New y: "))
+                self.Nlist[idx].i = i
+                self.Nlist[idx].j = j
+                so.__details__(self.Nlist,self.Elist,self.Plist)               
+                            
+            if cmd=="cd" and sbcmd=="edge": #Change Details
+                idx=int(input("Edge: "))
+                i=int(input("New Node 1: "))
+                j=int(input("New Node 2: "))
+                self.Elist[idx].i = i
+                self.Elist[idx].j = j
+                so.__details__(self.Nlist,self.Elist,self.Plist)               
+            
+            if cmd=="cd" and sbcmd=="particle": #Change Details
+                idx=int(input("Particle: "))
+                i=int(input("New Node: "))
+                self.Plist[idx].i = i
+                so.__details__(self.Nlist,self.Elist,self.Plist)               
+            ###EDIT SELECTED OBJECT
             
             if cmd=="deleten" or (cmd=="delete" and sbcmd=="node"):
                 i=int(input("Node: "))
@@ -488,6 +571,7 @@ class NetworkDesign:
         
 ###Clean Up Codes
 ###Add comments to codes
+###Check code for consistency
 ###TEST AND DEBUG
 
 n=100 #20 nodes
