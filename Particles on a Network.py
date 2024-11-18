@@ -138,9 +138,9 @@ class Particle2D:
     #Scroll through particles
 
     def __move__(self, Nlist, *args):
-        Nlist[0].ipl=-1; #Empty node's internal particle list
+        print('{}: {} -> {}'.format(self.idx,self.i,args[0]))
+        Nlist[self.i].ipl=-1; #Empty node's internal particle list
         self.i=args[0] #Update particle's node
-        print(self.i)
         Nlist[self.i].ipl=self.idx #Update next node's internal particle list    
     #Move particle
 
@@ -183,18 +183,20 @@ class NetworkPart:
             print((self.Nlist[a]).__str__()) #Print node
             matplotlib.pyplot.plot(self.i,self.j,'bo',markersize=20) #Plot node
         matplotlib.pyplot.show
-        print("\n")
-        for a in range(self.M): #Edges
-            print("\n")
+        print("")
+        a=0
+        while a<self.M: #Edges
             l=random.randint(0,self.N-1) #Random node
             r=random.randint(0,self.N-1) #Random node
-            (self.Elist).append(Edge2D(l,r,idx=a)) #Add edge to list
-            print((self.Elist[a]).__str__()) #Print edge
-            ((self.Nlist[l]).iel).append(a) #Add edge to list within node
-            ((self.Nlist[r]).iel).append(a) #and other node       
-            matplotlib.pyplot.plot([self.Nlist[l].i,self.Nlist[r].i],[self.Nlist[l].j,self.Nlist[r].j],'r-') #Plot edge 
+            if(l!=r):
+                (self.Elist).append(Edge2D(l,r,idx=a)) #Add edge to list
+                print((self.Elist[a]).__str__()) #Print edge
+                ((self.Nlist[l]).iel).append(a) #Add edge to list within node
+                ((self.Nlist[r]).iel).append(a) #and other node       
+                matplotlib.pyplot.plot([self.Nlist[l].i,self.Nlist[r].i],[self.Nlist[l].j,self.Nlist[r].j],'r-') #Plot edge 
+                a=a+1 #Move on to next edge
         matplotlib.pyplot.show
-        print("\n")
+        print("")
         for a in range(self.p): #Particles
             r=random.randint(0,self.N-1) #Random node
             while(self.Nlist[r].ocheck()==True): #Until empty
@@ -202,6 +204,8 @@ class NetworkPart:
             (self.Plist).append(Particle2D(r,idx=a)) #Add particle to list
             (self.Nlist[r]).ipl=a #Add particle to list within node
             print((self.Plist[a]).__str__()) #Print particle
+            matplotlib.pyplot.plot(self.Nlist[self.Plist[a].i].i,self.Nlist[self.Plist[a].i].j,'kx') #Plot particle 
+        matplotlib.pyplot.show
 
     def __addedge__(self, *args):
         self.a,self.b=args[0],args[1]
@@ -276,16 +280,14 @@ class NetworkPart:
             n=(self.Plist[r]).i #Node occupying        
             ne=len((self.Nlist[n]).iel) #Number of connected edges
             if ne>0: #if any
-                r2=random.randint(0,ne-1) #Random number 0 to ne
+                r2=random.randint(0,ne-1) #Random number 0 to ne-1
                 e=self.Elist[(self.Nlist[n]).iel[r2]] #corresponds to random connected edge
                 nn=e.echeck(n); #Return index of next node at opposite end of edge
                 if(self.Nlist[nn].ocheck()==False): #If node unnoccupied
                     self.Plist[r].__move__(self.Nlist,nn) #Move particle to next node
         
-        matplotlib.pyplot.figure() #New figure
-        matplotlib.pyplot.xlim([0,100])
-        matplotlib.pyplot.ylim([0,100])
-
+        self.__plot__(self.Nlist,self.Elist,self.Plist)
+        
     def __plot__(self, Nlist, Elist, plist):
         matplotlib.pyplot.figure() #New figure
         matplotlib.pyplot.xlim([0,100])
@@ -293,16 +295,16 @@ class NetworkPart:
         n = len(Nlist)
         m = len(Elist)
         p = len(plist)
-        for a in range(0,n-1):
-            if self.__excheck__(Nlist[a]):            
-                matplotlib.pyplot.plot(self.Nlist[a].i,self.Nlist[a].j,'bo',markersize=20) #Plot node 
-        for a in range(0,m-1):  
-            if self.__excheck__(Elist[a]):
+        for a in range(0,n):
+            if self.__excheck__(Nlist[a]): #Check node exists
+                matplotlib.pyplot.plot(self.Nlist[a].i,self.Nlist[a].j,'bo',markersize=20) #Plot node
+        for a in range(0,m):  
+            if self.__excheck__(Elist[a]): #Check edge exists
                 ln=self.Elist[a].i
                 un=self.Elist[a].j
                 matplotlib.pyplot.plot([self.Nlist[ln].i,self.Nlist[un].i],[self.Nlist[ln].j,self.Nlist[un].j],'r-') #Plot edge 
-        for a in range(0,p-1): 
-            if self.__excheck__(plist[a]):
+        for a in range(0,p): 
+            if self.__excheck__(plist[a]): #Check particle exists
                 matplotlib.pyplot.plot(self.Nlist[plist[a].i].i,self.Nlist[plist[a].i].j,'kx') #Plot particle 
 
 
@@ -574,21 +576,22 @@ class NetworkDesign:
 ###Check code for consistency
 ###TEST AND DEBUG
 
-n=100 #20 nodes
-m=60 #8 edges
-p=10 #5 particles
+n=20 #20 nodes
+m=8 #8 edges
+p=5 #5 particles
 
 print("NETWORK")
 Np=NetworkPart(n,m,p) #Generate Network
+print("")
 Np.__activate__(20) #Activate 
-Np.__plot__(Np.Nlist,Np.Elist,Np.Plist)
+#Np.__plot__(Np.Nlist,Np.Elist,Np.Plist)
 ###Hop fails if node has no neighbours or jump is to occupied node
 ###Each hop is followed by a figure 
 
 
-print("\n")
-print("\nDesigned Network")
-dN=NetworkDesign()
+#print("\n")
+#print("\nDesigned Network")
+#dN=NetworkDesign()
 #dN.__plot__(dN.Nlist,dN.Elist,dN.Plist)
 
 ###TESTS
