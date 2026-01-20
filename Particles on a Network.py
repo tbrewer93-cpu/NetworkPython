@@ -49,16 +49,16 @@ class Edge2D:
         return 'Edge {} connecting nodes {} and {}'.format(self.idx,self.i,self.j)
     #Define String
 
-    def __details__(self,Nlist,Elist,Plist):
+    def __details__(self,Nlist,Elist,plist):
         print('Edge {} connecting nodes {} and {}'.format(self.idx,self.i,self.j))
         ln=Nlist[self.i] #"Lower" node
         print(ln.__str__())
         if(ln.ocheck()): #If occupied
-            print(Plist[ln.ipl].__str__())
+            print(plist[ln.ipl].__str__())
         un=Nlist[self.j] #"Upper" node
         print(un.__str__())
         if(un.ocheck()): #If occupied
-            print(Plist[un.ipl].__str__())
+            print(plist[un.ipl].__str__())
 
 
 class Node2D:
@@ -110,13 +110,13 @@ class Node2D:
         return edex
     #Check if an edge exists connecting to another particular node
    
-    def __delete__(self,Nlist,Elist,Plist):
+    def __delete__(self,Nlist,Elist,plist):
         ne=len(self.iel) #Number of edges connected to node
         for a in range(len(self.iel)): #For each related edge
             Elist[self.iel[ne-a-1]].__delete__(Nlist, Elist)
             #Delete Edges in reverse order in list
         if self.ocheck(): #If node occupied
-            Plist[self.ipl].__delete__(Nlist, Plist) #Delete occupying particle
+            plist[self.ipl].__delete__(Nlist, plist) #Delete occupying particle
         Nlist[self.idx]=None #Delete node from list
         return None
     #Delete Node
@@ -124,12 +124,12 @@ class Node2D:
     def __str__(self):
         return 'Node {} at co-ord {},{}'.format(self.idx,self.i,self.j)
 
-    def __details__(self,Nlist,Elist,Plist):
+    def __details__(self,Nlist,Elist,plist):
         print('Node {} at co-ord {},{}'.format(self.idx,self.i,self.j))
         for a in range(len(self.iel)): #For each related edge
             print(Elist[a].__str__()) #Print edge
         if(self.ocheck()): #If occupied
-            print(Plist[self.ipl].__str__()) #Print particle
+            print(plist[self.ipl].__str__()) #Print particle
 
 class Particle2D:
     def __init__(self, *args, **kwargs):
@@ -140,13 +140,13 @@ class Particle2D:
         if(kwargs.__contains__('idx')):
             self.idx=kwargs['idx']
 
-    def __next__(self,Plist):
-        l=len(Plist)
-        return Plist[(self.idx+1)%l]
+    def __next__(self,plist):
+        l=len(plist)
+        return plist[(self.idx+1)%l]
     
-    def __prev__(self,Plist):
-        l=len(Plist)
-        return Plist[(self.idx-1)%l]
+    def __prev__(self,plist):
+        l=len(plist)
+        return plist[(self.idx-1)%l]
     #Scroll through particles
 
     def __move__(self, Nlist, *args):
@@ -156,16 +156,16 @@ class Particle2D:
         Nlist[self.i].ipl=self.idx #Update next node's internal particle list    
     #Move particle
 
-    def __delete__(self,Nlist,Plist):
+    def __delete__(self,Nlist,plist):
         Nlist[self.i].ipl=-1 #Remove particle from nodes internal list
-        Plist[self.idx]=None #Delete particle from list
+        plist[self.idx]=None #Delete particle from list
         return None
     #Delete particle
 
     def __str__(self):
         return 'Particle {} on node {}'.format(self.idx,self.i)
 
-    def __details__(self,Nlist,Elist,Plist):
+    def __details__(self,Nlist,Elist,plist):
         print('Particle {} on node {}'.format(self.idx,self.i))
         n=Nlist[self.i] #Node
         print(n.__str__())
@@ -188,7 +188,7 @@ class NetworkPart:
             
         self.Nlist=[] #List of nodes
         self.Elist=[] #List of edges
-        self.Plist=[] #List of particles
+        self.plist=[] #List of particles
         matplotlib.pyplot.figure() #New figure
         matplotlib.pyplot.xlim([0,100])
         matplotlib.pyplot.ylim([0,100])
@@ -221,9 +221,9 @@ class NetworkPart:
             r=random.randint(0,self.N-1) #Random node
             while(self.Nlist[r].ocheck()==True): #Until empty
                 r=random.randint(0,self.N-1) #Pick a random node
-            (self.Plist).append(Particle2D(r,idx=a)) #Add particle to list
+            (self.plist).append(Particle2D(r,idx=a)) #Add particle to list
             (self.Nlist[r]).ipl=a #Add particle to list within node
-            print((self.Plist[a]).__str__()) #Print particle
+            print((self.plist[a]).__str__()) #Print particle
             matplotlib.pyplot.plot(self.Nlist[self.Plist[a].i].i,self.Nlist[self.Plist[a].i].j,'kx') #Plot particle 
         matplotlib.pyplot.show
 
@@ -297,16 +297,16 @@ class NetworkPart:
         h=args[0]; #Number of hops
         for a in range(0,h):
             r=random.randint(0,self.p-1) #Random particle
-            n=(self.Plist[r]).i #Node occupying        
+            n=(self.plist[r]).i #Node occupying        
             ne=len((self.Nlist[n]).iel) #Number of connected edges
             if ne>0: #if any
                 r2=random.randint(0,ne-1) #Random number 0 to ne-1
                 e=self.Elist[(self.Nlist[n]).iel[r2]] #corresponds to random connected edge
                 nn=e.echeck(n); #Return index of next node at opposite end of edge
                 if(self.Nlist[nn].ocheck()==False): #If node unnoccupied
-                    self.Plist[r].__move__(self.Nlist,nn) #Move particle to next node
+                    self.plist[r].__move__(self.Nlist,nn) #Move particle to next node
         
-        self.__plot__(self.Nlist,self.Elist,self.Plist)
+        self.__plot__(self.Nlist,self.Elist,self.plist)
         
     def __plot__(self, Nlist, Elist, plist):
         matplotlib.pyplot.figure() #New figure
@@ -331,7 +331,7 @@ class NetworkPart:
 class NetworkDesign:
     Nlist=[] #List of nodes
     Elist=[] #List of edges
-    Plist=[] #List of particles   
+    plist=[] #List of particles   
     
     N=0 #Number of particles
     M=0 #Number of edges
@@ -374,8 +374,8 @@ class NetworkDesign:
     
     def __addparticle__(self, *args):
         (self.i)=args[0]
-        L=len(self.Plist)
-        (self.Plist).append(Particle2D(self.i,idx=L))
+        L=len(self.plist)
+        (self.plist).append(Particle2D(self.i,idx=L))
         (self.Nlist[self.i]).ipl=L #Save particle in nodes internal list
         self.p=L+1
     
@@ -401,18 +401,18 @@ class NetworkDesign:
         #Move particle with idx args[0] to node args[1]
          
     def __deletenode__(self, *args):
-        (self.Nlist[args[0]]).__delete__(self.Nlist,self.Elist,self.Plist)
-        #self.N=self.N-1
+        (self.Nlist[args[0]]).__delete__(self.Nlist,self.Elist,self.plist)
+        self.N=self.N-1
         #Delete node with idx args[0]
 
     def __deleteedge__(self, *args):
         (self.Elist[args[0]]).__delete__(self.Nlist,self.Elist)
-        #self.M=self.M-1
+        self.M=self.M-1
         #Delete edge with idx args[0]
 
     def __deleteparticle__(self, *args):
-        (self.Plist[args[0]]).__delete__(self.Nlist,self.Plist)
-        #self.p=self.p-1
+        (self.plist[args[0]]).__delete__(self.Nlist,self.plist)
+        self.p=self.p-1
         #Delete particle with idx args[0]
         
     def __printn__(self):
@@ -425,7 +425,7 @@ class NetworkDesign:
 
     def __printp__(self):
         for a in range(0,self.p):
-            print(self.Plist[a])
+            print(self.plist[a])
 
     def __excheck__(self, *args):
         (self.obj)=args[0]
@@ -444,15 +444,15 @@ class NetworkDesign:
             tp+=self.Elist[a].__str__()
             tp+="\n"
         for a in range(0,self.p):
-            tp+=self.Plist[a].__str__()
+            tp+=self.plist[a].__str__()
             tp+="\n"
         return(tp)
     
     def __init__(self, *args, **kwargs):
         self.Nlist=[] #List of nodes
         self.Elist=[] #List of edges
-        self.Plist=[] #List of particles
-        self.__plot__(self.Nlist,self.Elist,self.Plist)
+        self.plist=[] #List of particles
+        self.__plot__(self.Nlist,self.Elist,self.plist)
         run = True
         cmd=""
         sbcmd="" #Subcommand
@@ -508,7 +508,7 @@ class NetworkDesign:
             if cmd=="printe" or (cmd=="print" and sbcmd=="edges"):
                 self.__printe__()
             if cmd=="printp" or (cmd=="print" and sbcmd=="particles"):
-                self.__printe__()    
+                self.__printp__()    
             if cmd=="printN" or (cmd=="print" and sbcmd=="network"):
                 print(self.__str__())      
                 
@@ -520,7 +520,7 @@ class NetworkDesign:
                 print(self.Elist[idx])
             if cmd=="print" and sbcmd=="particle":
                 idx=int(input("Particle: "))
-                print(self.Plist[idx])
+                print(self.plist[idx])
             ###PRINT OBJECTS
             
             if cmd=="select" and sbcmd=="node":
@@ -533,8 +533,8 @@ class NetworkDesign:
                 sl=self.Elist
             if cmd=="select" and sbcmd=="particle":
                 idx=int(input("Particle: "))
-                so=self.Plist[idx]
-                sl=self.Plist
+                so=self.plist[idx]
+                sl=self.plist
             ###SELECT OBJECTS
             
             if cmd=="next":
@@ -545,7 +545,7 @@ class NetworkDesign:
             ###CHANGE SELECTED OBJECT
             
             if cmd=="details":
-                so.__details__(self.Nlist,self.Elist,self.Plist)               
+                so.__details__(self.Nlist,self.Elist,self.plist)               
             ###PRINT SELECTED OBJECT
             
             if cmd=="cd" and sbcmd=="node": #Change Details
@@ -555,21 +555,21 @@ class NetworkDesign:
                     j=int(input("New y: "))
                     self.Nlist[idx].i = i
                     self.Nlist[idx].j = j
-                    so.__details__(self.Nlist,self.Elist,self.Plist)  
+                    so.__details__(self.Nlist,self.Elist,self.plist)  
 
                 elif type(so)==Edge2D and (so.i==idx or so.j==idx):
                     i=int(input("New x: "))
                     j=int(input("New y: "))
                     self.Nlist[idx].i = i
                     self.Nlist[idx].j = j
-                    so.__details__(self.Nlist,self.Elist,self.Plist)  
+                    so.__details__(self.Nlist,self.Elist,self.plist)  
                 
                 elif type(so)==Particle2D and so.i==idx:
                     i=int(input("New x: "))
                     j=int(input("New y: "))
                     self.Nlist[idx].i = i
                     self.Nlist[idx].j = j
-                    so.__details__(self.Nlist,self.Elist,self.Plist) 
+                    so.__details__(self.Nlist,self.Elist,self.plist) 
                 
                 else:
                     print("Error! Node not in details list!")
@@ -586,7 +586,7 @@ class NetworkDesign:
                             j=int(input("New Node 2: "))
                             self.Elist[idx].i = i
                             self.Elist[idx].j = j
-                            so.__details__(self.Nlist,self.Elist,self.Plist)  
+                            so.__details__(self.Nlist,self.Elist,self.plist)  
                     if ec==False:
                         print("Error! Edge not in details list")
                 
@@ -595,20 +595,20 @@ class NetworkDesign:
                     j=int(input("New Node 2: "))
                     self.Elist[idx].i = i
                     self.Elist[idx].j = j
-                    so.__details__(self.Nlist,self.Elist,self.Plist)    
+                    so.__details__(self.Nlist,self.Elist,self.plist)    
  
                 elif type(so)==Particle2D:
                     spn=self.Nlist[so.i] #Selected particle's node
                     ne=len(spn.iel)
                     ec=False #True if edge idx is connected to spn
-                    for a in range(ne): #Check spn's connected
+                    for a in range(ne): #Check spn's connected edges
                         if spn.iel[a]==idx: #If entered edge is in list
                             ec=True
                             i=int(input("New Node 1: "))
                             j=int(input("New Node 2: "))
                             self.Elist[idx].i = i
                             self.Elist[idx].j = j
-                            so.__details__(self.Nlist,self.Elist,self.Plist)    
+                            so.__details__(self.Nlist,self.Elist,self.plist)    
                     if ec==False:
                         print("Error! Edge not in details list!")
                 
@@ -618,13 +618,23 @@ class NetworkDesign:
             
             if cmd=="cd" and sbcmd=="particle": #Change Details
                 idx=int(input("Particle: "))
-                if type(so)==Particle2D and so.idx==idx:
+                if type(so)==Node2D and so.ipl==idx:
+                    i=int(input("New Node: "))
+                    self.plist[idx].i = i
+                    so.__details__(self.Nlist,self.Elist,self.plist)
+                
+                elif type(so)==Edge2D and (self.Nlist[so.i].ipl==idx or self.Nlist[so.j].ipl==idx):
                     i=int(input("New Node: "))
                     self.Plist[idx].i = i
-                    so.__details__(self.Nlist,self.Elist,self.Plist)
+                    so.__details__(self.Nlist,self.Elist,self.plist)
                 
+                elif type(so)==Particle2D and so.idx==idx:
+                    i=int(input("New Node: "))
+                    self.Plist[idx].i = i
+                    so.__details__(self.Nlist,self.Elist,self.plist)
                 
-                    print("Particle! Particle not in details list!")
+                else:
+                    print("Error! Particle not in details list!")
             ###EDIT SELECTED OBJECT
             
             if cmd=="deleten" or (cmd=="delete" and sbcmd=="node"):
@@ -639,7 +649,7 @@ class NetworkDesign:
             ###DELETE OBJECTS
             
             if cmd=="plot":
-                self.__plot__(self.Nlist,self.Elist,self.Plist)
+                self.__plot__(self.Nlist,self.Elist,self.plist)
             ###PLOT NETWORK    
                 
             if cmd=="end":
@@ -648,6 +658,8 @@ class NetworkDesign:
         
         
 ###Clean Up Codes
+###Change details commands should really use __move__ methods
+###Error messages for all cases where beyond limit
 ###Add comments to codes
 ###Check code for consistency
 ###TEST AND DEBUG
