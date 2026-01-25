@@ -45,8 +45,8 @@ class Node:
 
 class Node1D:
     def __init__(self, *args, **kwargs):
-        self.i = args[0]
-        self.w = args[1]
+        self.i = args[0] #X Position
+        self.w = args[1] #Weight
         self.iel = [] #Internal edge list
 
         ###DEFAULTS
@@ -72,7 +72,7 @@ class Node1D:
     #Delete Node
 
     def __str__(self):
-        return 'Node[{}] of index {} at co-ord {} - {}'.format(self.edge_max,self.idx,self.i,self.iel)
+        return 'Node of index {} at co-ord {}'.format(self.idx,self.i)
 
 class Node2D:
     def __init__(self, *args, **kwargs):
@@ -171,20 +171,17 @@ class NetworkSimp:
         self.Nlist=[] #List of nodes
         self.Elist=[] #List of edges
         for a in range(self.N):
-            (self.Nlist).append(Node1D(a,0,idx=a,conn=2)) #Add each node to list
+            (self.Nlist).append(Node1D(a,0,idx=a,conn=2)) #Add each node to node list
             print((self.Nlist[a]).__str__()) #Print node
             matplotlib.pyplot.plot(a,pow(a,2),'kx') #Plot node
         matplotlib.pyplot.show
         print("\n")
         for a in range(self.N):
-            print("\n")
             b=(a+1)%self.N #Neighbouring node
-            (self.Elist).append(Edge1D(a,b,idx=a)) #Add edge to list
+            (self.Elist).append(Edge1D(a,b,idx=a)) #Add edge to edge list
             print((self.Elist[a]).__str__()) #Print edge
             ((self.Nlist[a]).iel).append(a) #Add edge list within node
-            ((self.Nlist[b]).iel).append(a) #and other node           
-            print((self.Nlist[a]).iel) #Print internal lists
-            print((self.Nlist[b]).iel)
+            ((self.Nlist[b]).iel).append(a) #and other node   
             matplotlib.pyplot.plot([a,b],[pow(a,2),pow(b,2)],'r-') #Plot edge 
     
     def __deleteedge__(self, *args):
@@ -325,7 +322,7 @@ n=8 #8 nodes
 print("NETWORK")
 Ns=NetworkSimp(n) #Generate Network
 
-###Tests
+###Textual Tests
 print("\n")
 print("TESTS")
 print((Ns.Nlist[6]).__str__())  #Print a node
@@ -337,25 +334,31 @@ print(nb)
 nb=nb.__next__(Ns.Elist) #Iterate again
 print(nb) 
 
-le=(Ns.Nlist[7]).iel[0] #Lower edge
+print("\n")
+print("Testing node cycling:")
+le=(Ns.Nlist[n-1]).iel[0] #Lower edge on final node
 print("Edge ",le)
-de=((Ns.Elist[le]).__next__(Ns.Elist)).idx #Iterate edge
+de=((Ns.Elist[le]).__next__(Ns.Elist)).idx #Iterate to edge that restarts network
 print("Edge ",de)
-de=((Ns.Elist[de]).__next__(Ns.Elist)).idx #Iterate edge
+de=((Ns.Elist[de]).__next__(Ns.Elist)).idx #Iterate to first edge in network
 print("Edge ",de)
-print("Lower node",Ns.Elist[de].i) #Lower node
+print("Lower node",Ns.Elist[de].i) #Lower node of first edge in network
 
 print("\n")
-print((Ns.Elist[0]).__str__())
-Ns.__deleteedge__(0)
-print((Ns.Elist[0]).__str__())
+print("Testing edge deletion:")
+print((Ns.Elist[0]).__str__()) #Edge 0
+Ns.__deleteedge__(0) #Edge deleted
+print((Ns.Elist[0]).__str__()) #Reprint edge 0
 
-print((Ns.Elist[1]).__str__())
-Ns.__deleteedge__(1)
-print((Ns.Elist[1]).__str__())
+print((Ns.Nlist[1]).iel)
 
-print((Ns.Nlist[1]).__str__())
-#Delete Edge
+print((Ns.Elist[1]).__str__()) #Edge 1 
+Ns.__deleteedge__(1) #Edge deleted
+print((Ns.Elist[1]).__str__()) #Reprint edge 1
+
+print((Ns.Nlist[1]).__str__()) #Remaining edgeless node
+print((Ns.Nlist[1]).iel)
+
 
 print("\n")
 print((Ns.Nlist[2]).__str__())
