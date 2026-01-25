@@ -329,12 +329,12 @@ Ns=NetworkSimp(n) #Generate Network
 print("\n")
 print("TESTS")
 print((Ns.Nlist[6]).__str__())  #Print a node
-print((Ns.Nlist[6]).__next__(Ns.Nlist)) #Iterate
+print((Ns.Nlist[6]).__next__(Ns.Nlist)) #Iterate and print
 
 print((Ns.Elist[1]).__str__())  #Print an edge
 nb=(Ns.Elist[1]).__next__(Ns.Elist) #Iterate
 print(nb)
-nb=nb.__next__(Ns.Elist)
+nb=nb.__next__(Ns.Elist) #Iterate again
 print(nb) 
 
 le=(Ns.Nlist[7]).iel[0] #Lower edge
@@ -368,28 +368,28 @@ print((Ns.Nlist[5]).__str__())
 #Delete node
 
 
-n=8 #8 nodes
-m=3 #5 edges
-print("\n\n\n\nNETWORK - RANDOM")
-Nr=NetworkCircR(n,m) #Generate Network
+#n=8 #8 nodes
+#m=3 #5 edges
+#print("\n\n\n\nNETWORK - RANDOM")
+#Nr=NetworkCircR(n,m) #Generate Network
 
 ###Tests
-print("\n")
-print("TESTS")
-print((Nr.Nlist[6]).__str__())  #Print a node
-print((Nr.Nlist[6]).__next__(Ns.Nlist)) #Iterate
+#print("\n")
+#print("TESTS")
+#print((Nr.Nlist[6]).__str__())  #Print a node
+#print((Nr.Nlist[6]).__next__(Ns.Nlist)) #Iterate
 
-print((Nr.Elist[1]).__str__())  #Print an edge
-nb=(Nr.Elist[1]).__next__(Nr.Elist) #Iterate
-print(nb)
-nb=nb.__next__(Nr.Elist)
-print(nb) 
+#print((Nr.Elist[1]).__str__())  #Print an edge
+#nb=(Nr.Elist[1]).__next__(Nr.Elist) #Iterate
+#print(nb)
+#nb=nb.__next__(Nr.Elist)
+#print(nb) 
 
 
-n=100 #8 nodes
-m=24 #3 edges
-print("\n\n\n\n2D RANDOM NETWORK")
-N2D=Network2D(n,m) #Generate Network
+#n=100 #8 nodes
+#m=24 #3 edges
+#print("\n\n\n\n2D RANDOM NETWORK")
+#N2D=Network2D(n,m) #Generate Network
 
 #le=(Ns.Nlist[7]).iel[0] #Lower edge
 #print("Edge ",le)
