@@ -37,7 +37,8 @@ class Node:
     #Give nodes adjoining edges (initialise)
 
     def __next__(self,Nlist):
-        return Nlist[self.idx+1]       
+        return Nlist[self.idx+1]    
+    
     #Scroll through nodes
     
     def __str__(self):
@@ -361,6 +362,7 @@ print((Ns.Nlist[1]).iel)
 
 
 print("\n")
+print("Testing node deletion:")
 print((Ns.Nlist[2]).__str__())
 Ns.__deletenode__(2)
 print((Ns.Nlist[2]).__str__())
